@@ -1,8 +1,20 @@
+PUSH4 MACRO
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+ENDM
+POP4 MACRO
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+ENDM
 ; multi-segment executable file template.
 data segment
 ; add your data here!
 pkey db "press any key...$"
-STU0 DB "00",95,0,48,0,81,0,4 DUP(0)    ;number,chinese score,ranking,maths score,ranking,english score,ranking
+STU0 DB "00",95,0,100,0,81,0,4 DUP(0)    ;number,chinese score,ranking,maths score,ranking,english score,ranking
 ;total score,ranking,average score
 STU1 DB "01",55,0,94,0,45,0,4 DUP(0)
 STU2 DB "02",68,0,83,0,90,0,4 DUP(0)
@@ -69,6 +81,7 @@ mov ds, ax
 mov es, ax
 
 begin:
+
 MOV BX,02H
 CALL SORTSUBJECT
 CALL RANK
@@ -78,16 +91,11 @@ CALL RANK
 MOV BX,06H
 CALL SORTSUBJECT
 CALL RANK
-
 CALL STATISTIC
-
 CALL SORTSUBJECT_DW
 CALL RANK_DW
-
 CALL AVER          ; average score for everyone
-
 CALL AVER_SUBJECT  ; average score for every subject and total score
-
 CALL RANGE  ;
 
 
@@ -131,30 +139,9 @@ cmp al,36h
 jz check_modify
 jmp operate
 check:
-lea dx,caption1next
-mov ah,09h
-int 21h
 
-lea dx,student_num
-mov ah,0ah
-int 21h
+call get_id
 
-lea di,student_num+2
-mov ah,[di]
-inc di
-mov al,[di]
-
-check_stu:
-sub ax,3030h
-mov cx,ax
-lea di,STU0+2
-cmp cx,0
-jz reach_check_stu_not0
-reach_check_stu:
-add di,12
-loop reach_check_stu
-reach_check_stu_not0:
-call CRLF
 lea dx,caption1items
 mov ah,9
 int 21h
@@ -299,6 +286,7 @@ inc di
 loop clear_failed
 
 jmp begin
+
 record_data:
 lea dx,record_state1
 mov ah,9
@@ -374,11 +362,7 @@ ret
 stdout endp
 
 dec2hex proc
-push ax
-push bx
-push cx
-push dx
-
+PUSH4
 mov cl,0ah
 mov ch,0
 mov bx,0
@@ -389,7 +373,7 @@ cmp al,' '
 
 jz input_dec2hex_1
 cmp ch,0
-ja record_tmp
+JG record_tmp
 jmp nrecord_tmp
 record_tmp:
 mov bx,dx
@@ -414,19 +398,14 @@ jmp input_dec2hex_end
 input_dec2hex_2:
 mov [di],bl
 input_dec2hex_end:
-pop dx
-pop cx
-pop bx
-pop ax
+POP4
 
 ret
 dec2hex endp
 
 dec16out proc     ;display the value of dx
-push di
-push dx
-push cx
-push ax
+PUSH4 
+PUSH DI
 mov cx,0
 lea di,tbuff
 
@@ -451,11 +430,9 @@ loop dec2
 
 mov dl,20h
 mov ah,2
-int 21h
-pop ax
-pop cx
-pop dx
-pop di
+int 21h 
+POP DI
+POP4
 ret
 dec16out endp
 
@@ -485,7 +462,7 @@ SORT_3:
 MOV AL,[DI]
 MOV AH,[SI]
 CMP AL,AH
-JB SWAP
+JL SWAP
 JMP NSWAP
 SWAP:
 MOV [DI],AH
@@ -602,7 +579,7 @@ INC SI
 MOV BL,[SI]
 DEC SI
 CMP AX,BX
-JB SWAP_DW
+JL SWAP_DW
 JMP NSWAP_DW
 SWAP_DW:
 MOV [DI],BH
@@ -748,21 +725,21 @@ MOV CX,TOTAL
 
 R_CH:
 CMP [DI],90
-JAE R1
+JGE R1
 JMP R2
 R1:LEA SI,NUM_CH
 ADD SI,4
 ADD [SI],1
 JMP R9
 R2:CMP [DI],80
-JAE R3
+JGE R3
 JMP R4
 R3:LEA SI,NUM_CH
 ADD SI,3
 ADD [SI],1
 JMP R9
 R4:CMP [DI],70
-JAE R5
+JGE R5
 JMP R6
 
 R5:LEA SI,NUM_CH
@@ -809,21 +786,21 @@ MOV CX,TOTAL
 
 R_MA:
 CMP [DI],90
-JAE R1_MA
+JGE R1_MA
 JMP R2_MA
 R1_MA:LEA SI,NUM_MA
 ADD SI,4
 ADD [SI],1
 JMP R9_MA
 R2_MA:CMP [DI],80
-JAE R3_MA
+JGE R3_MA
 JMP R4_MA
 R3_MA:LEA SI,NUM_MA
 ADD SI,3
 ADD [SI],1
 JMP R9_MA
 R4_MA:CMP [DI],70
-JAE R5_MA
+JGE R5_MA
 JMP R6_MA
 
 R5_MA:LEA SI,NUM_MA
@@ -831,7 +808,7 @@ ADD SI,2
 ADD [SI],1
 JMP R9_MA
 R6_MA:CMP [DI],60
-JAE R7_MA
+JGE R7_MA
 JMP R8_MA
 
 
@@ -871,21 +848,21 @@ MOV CX,TOTAL
 
 R_EN:
 CMP [DI],90
-JAE R1_EN
+JGE R1_EN
 JMP R2_EN
 R1_EN:LEA SI,NUM_EN
 ADD SI,4
 ADD [SI],1
 JMP R9_EN
 R2_EN:CMP [DI],80
-JAE R3_EN
+JGE R3_EN
 JMP R4_EN
 R3_EN:LEA SI,NUM_EN
 ADD SI,3
 ADD [SI],1
 JMP R9_EN
 R4_EN:CMP [DI],70
-JAE R5_EN
+JGE R5_EN
 JMP R6_EN
 
 R5_EN:LEA SI,NUM_EN
@@ -1146,35 +1123,10 @@ ret
 show_average endp
 
 modify_data proc
-push ax
-push bx
-push cx
-push dx
+PUSH4
 modify1:
-lea dx,caption1next
-mov ah,09h
-int 21h
 
-lea dx,student_num
-mov ah,0ah
-int 21h
-
-lea di,student_num+2
-mov ah,[di]
-inc di
-mov al,[di]
-
-modify_stu:
-sub ax,3030h
-mov cx,ax
-lea di,STU0+2
-cmp cx,0
-jz reach_modify_stu_not0
-reach_modify_stu:
-add di,12
-loop reach_modify_stu
-reach_modify_stu_not0:
-call CRLF
+call get_id
 
 mov si,di
 lea dx,caption6items
@@ -1223,11 +1175,36 @@ call dec2hex
 mov al,[di]
 mov [si],al
 modify_end:
-pop dx
-pop cx
-pop bx
-pop ax
+POP4
 ret
 modify_data endp
-end start ; set entry point and stop the assembler.
 
+get_id proc     ; input the id, di store the address of chinese of that student
+    
+    lea dx,caption1next
+    mov ah,09h
+    int 21h
+
+    lea dx,student_num
+    mov ah,0ah
+    int 21h
+
+    lea di,student_num+2
+    mov ah,[di]
+    inc di
+    mov al,[di]
+
+    get_stu:
+    sub ax,3030h
+    mov cx,ax
+    lea di,STU0+2
+    cmp cx,0
+    jz reach_get_stu_not0
+    reach_get_stu:
+    add di,12
+    loop reach_get_stu
+    reach_get_stu_not0:
+    call CRLF
+    ret
+get_id endp
+end start ; set entry point and stop the assembler.
