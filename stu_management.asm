@@ -101,27 +101,19 @@ CALL RANGE  ;
 
 operate:
 lea dx,caption_wel
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption1
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption2
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption3
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption4
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption5
-mov ah,09h
-int 21h
+call show_string
 lea dx,caption6
-mov ah,09h
-int 21h
-
+call show_string
 mov ah,01h
 int 21h
 
@@ -143,8 +135,7 @@ check:
 call get_id
 
 lea dx,caption1items
-mov ah,9
-int 21h
+call show_string
 call stdin
 push ax
 cmp al,31h
@@ -152,14 +143,12 @@ jz check_chinese
 jmp check_maths
 check_chinese:
 lea dx,captionscore
-mov ah,9
-int 21h
+call show_string
 mov dh,0
 mov dl,[di]
 call dec16out
 lea dx,captionranking
-mov ah,9
-int 21h
+call show_string
 inc di
 mov dh,0
 mov dl,[di]
@@ -176,15 +165,13 @@ jz check_maths1
 jmp check_english
 check_maths1:
 lea dx,captionscore
-mov ah,9
-int 21h
+call show_string
 add di,2
 mov dh,0
 mov dl,[di]
 call dec16out
 lea dx,captionranking
-mov ah,9
-int 21h
+call show_string
 inc di
 mov dh,0
 mov dl,[di]
@@ -201,15 +188,13 @@ jz check_english1
 jmp check_sum
 check_english1:
 lea dx,captionscore
-mov ah,9
-int 21h
+call show_string
 mov dh,0
 add di,4
 mov dl,[di]
 call dec16out
 lea dx,captionranking
-mov ah,9
-int 21h
+call show_string
 inc di
 mov dh,0
 mov dl,[di]
@@ -225,8 +210,7 @@ jz check_sum1
 jmp check_subback
 check_sum1:
 lea dx,captionscore
-mov ah,9
-int 21h
+call show_string
 mov dh,0
 add di,6
 mov dh,[di]
@@ -234,8 +218,7 @@ inc di
 mov dl,[di]
 call dec16out
 lea dx,captionranking
-mov ah,9
-int 21h
+call show_string
 inc di
 mov dh,0
 mov dl,[di]
@@ -272,25 +255,13 @@ check_modify:
 call modify_data
 
 ;clear what have done
-lea di,NUM_CH
-mov cx,15
-clear_num:
-mov [di],0
-inc di
-loop clear_num
-
-mov cx,60
-clear_failed:
-mov [di],"F"
-inc di
-loop clear_failed
+call clear
 
 jmp begin
 
 record_data:
 lea dx,record_state1
-mov ah,9
-int 21h
+call show_string
 
 lea di,STU0
 mov cx,TOTAL
@@ -335,8 +306,7 @@ lea di,STU0
 jmp operate
 
 lea dx, pkey
-mov ah, 9
-int 21h        ; output string at ds:dx
+call show_string        ; output string at ds:dx
 
 ; wait for any key....
 mov ah, 1
@@ -930,17 +900,14 @@ jmp output_show_who_are_failed_ch2_desc:
 
 output_show_who_are_failed_ch1:
 lea dx,caption2ch
-mov ah,9
-int 21h
+call show_string
 
 lea dx,caption2no
-mov ah,9
-int 21h
+call show_string
 jmp show_who_are_failed_ma:
 output_show_who_are_failed_ch2_desc:
 lea dx,caption2ch
-mov ah,9
-int 21h
+call show_string
 output_show_who_are_failed_ch2:
 mov al,[di]
 call stdout
@@ -962,16 +929,13 @@ jmp output_show_who_are_failed_ma2_desc:
 
 output_show_who_are_failed_ma1:
 lea dx,caption2ma
-mov ah,9
-int 21h
+call show_string
 lea dx,caption2no
-mov ah,9
-int 21h
+call show_string
 jmp show_who_are_failed_en:
 output_show_who_are_failed_ma2_desc:
 lea dx,caption2ma
-mov ah,9
-int 21h
+call show_string
 output_show_who_are_failed_ma2:
 mov al,[di]
 call stdout
@@ -994,17 +958,14 @@ jmp output_show_who_are_failed_en2_desc:
 
 output_show_who_are_failed_en1:
 lea dx,caption2en
-mov ah,9
-int 21h
+call show_string
 lea dx,caption2no
-mov ah,9
-int 21h
+call show_string
 jmp show_who_are_failed_end:
 
 output_show_who_are_failed_en2_desc:
 lea dx,caption2en
-mov ah,9
-int 21h
+call show_string
 output_show_who_are_failed_en2:
 mov al,[di]
 call stdout
@@ -1026,11 +987,9 @@ show_who_are_failed endp
 
 show_range proc
 lea dx,caption3_state
-mov ah,9
-int 21h
+call show_string
 lea dx,caption2ch
-mov ah,9
-int 21h
+call show_string
 lea di,NUM_CH
 mov cx,5
 
@@ -1045,8 +1004,7 @@ inc di
 loop show_range_ch
 
 lea dx,caption2ma
-mov ah,9
-int 21h
+call show_string
 
 mov cx,5
 show_range_ma:
@@ -1060,8 +1018,7 @@ inc di
 loop show_range_ma
 
 lea dx,caption2en
-mov ah,9
-int 21h
+call show_string
 mov cx,5
 show_range_en:
 
@@ -1078,8 +1035,7 @@ show_range endp
 
 show_average proc
 lea dx,caption4next
-mov ah,09h
-int 21h
+call show_string
 
 lea dx,caption2ch
 mov ah,09h
@@ -1092,8 +1048,7 @@ call dec16out
 
 inc di
 lea dx,caption2ma
-mov ah,09h
-int 21h
+call show_string
 
 mov dh,0
 mov dl,[di]
@@ -1102,16 +1057,14 @@ call dec16out
 inc di
 
 lea dx,caption2en
-mov ah,09h
-int 21h
+call show_string
 
 mov dh,0
 mov dl,[di]
 call dec16out
 inc di
 lea dx,caption2to
-mov ah,09h
-int 21h
+call show_string
 
 mov dh,[di]
 inc di
@@ -1130,8 +1083,7 @@ call get_id
 
 mov si,di
 lea dx,caption6items
-mov ah,9
-int 21h
+call show_string
 call stdin
 cmp al,31h
 jz modify_chinese
@@ -1143,8 +1095,7 @@ jmp modify1
 
 modify_chinese:
 lea dx,caption6input
-mov ah,9
-int 21h
+call show_string
 
 lea di,tbuff
 call dec2hex
@@ -1154,8 +1105,7 @@ jmp modify_end
 
 modify_maths:
 lea dx,caption6input
-mov ah,9
-int 21h
+call show_string
 
 lea di,tbuff
 add si,2
@@ -1166,8 +1116,7 @@ jmp modify_end
 
 modify_english:
 lea dx,caption6input
-mov ah,9
-int 21h
+call show_string
 
 lea di,tbuff
 add si,4
@@ -1180,10 +1129,9 @@ ret
 modify_data endp
 
 get_id proc     ; input the id, di store the address of chinese of that student
-    
+    PUSH4
     lea dx,caption1next
-    mov ah,09h
-    int 21h
+    call show_string
 
     lea dx,student_num
     mov ah,0ah
@@ -1205,6 +1153,46 @@ get_id proc     ; input the id, di store the address of chinese of that student
     loop reach_get_stu
     reach_get_stu_not0:
     call CRLF
+    POP4
     ret
 get_id endp
+show_string proc     ;show the string whose address is dx
+    mov ah,09h
+    int 21h
+    ret
+show_string endp
+clear proc
+    lea di,STU0
+mov cx,TOTAL
+clear_stu:
+    add di,3
+    mov [di],0
+    add di,2
+    mov [di],0
+    add di,2
+    mov [di],0
+    inc di
+    mov [di],0
+    inc di
+    mov [di],0
+    inc di
+    mov [di],0
+    inc di
+    mov [di],0
+    inc di
+    loop clear_stu        
+lea di,NUM_CH
+mov cx,15
+clear_num:
+mov [di],0
+inc di
+loop clear_num
+
+mov cx,60
+clear_failed:
+mov [di],"F"
+inc di
+loop clear_failed
+    ret
+clear endp
 end start ; set entry point and stop the assembler.
