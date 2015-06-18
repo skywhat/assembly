@@ -14,17 +14,18 @@ ENDM
 data segment
 ; add your data here!
 pkey db "press any key...$"
-STU0 DB "00",95,0,100,0,81,0,4 DUP(0)    ;number,chinese score,ranking,maths score,ranking,english score,ranking
+STU0 DB "00",90,0,80,0,55,0,4 DUP(0)    ;number,chinese score,ranking,maths score,ranking,english score,ranking
 ;total score,ranking,average score
-STU1 DB "01",55,0,94,0,45,0,4 DUP(0)
-STU2 DB "02",68,0,83,0,90,0,4 DUP(0)
-STU3 DB "03",85,0,76,0,55,0,4 DUP(0)
-STU4 DB "04",100,0,30,0,90,0,4 DUP(0)
-STU5 DB "05",100,0,100,0,100,0,4 DUP(0)
-STU6 DB "06",40,0,70,0,80,0,4 DUP(0)
-STU7 DB "07",50,0,40,0,20,0,4 DUP(0)
-STU8 DB "08",90,0,95,0,80,0,4 DUP(0)
-STU9 DB "09",40,0,70,0,70,0,4 DUP(0)
+STU1 DB "01",94,0,100,0,79,4 DUP(0)
+STU2 DB "02",85,0,90,0,70,0,4 DUP(0)
+STU3 DB "03",60,0,80,0,55,0,4 DUP(0)
+STU4 DB "04",70,0,90,0,60,0,4 DUP(0)
+STU5 DB "05",80,0,7,0,0,0,4 DUP(0)
+
+STU6 DB "07",60,0,75,0,100,0,4 DUP(0)
+STU7 DB "08",85,0,55,0,70,0,4 DUP(0)
+STU8 DB "09",60,0,80,0,40,0,4 DUP(0) 
+STU9 DB "06",75,0,78,0,48,0,4 DUP(0)
 
 SORTZONE DB  10 DUP(0)
 TOTAL EQU $-SORTZONE
@@ -58,9 +59,9 @@ caption2no db "none.$"
 caption3 db "3. show the amount of students in different ranges.",10,13,"$"
 caption3_state db 10,13,"<60,60~70,70~80,80~90,90~100.",10,13,"$"
 caption4 db "4. show the average score.",10,13,"$"
-caption4next db "average score:$"
+caption4next db 10,13,"average score:$"
 caption5 db "5. record the students' data.",10,13,"$"
-record_state1 db "please input 10 students' score of 3 subjects.",10,13,"$"
+record_state1 db 10,13,"please input 10 students' score of 3 subjects.",10,13,"$"
 caption6 db "6. modify the students' data.",10,13,"$"
 caption6items db 10,13,"1. chinese",10,13,"2. maths",10,13,"3. english",10,13,"$"
 caption6input db 10,13,"please input the score.",10,13,"$"
@@ -275,35 +276,9 @@ call dec2hex
 add di,6
 loop stu_10
 
+call clear
 
-lea di,STU0
-mov cx,TOTAL
-stu_10_:
-add di,2
-mov dh,0
-mov dl,[di]
-call dec16out
-add di,2
-mov dh,0
-mov dl,[di]
-call dec16out
-add di,2
-mov dh,0
-mov dl,[di]
-call dec16out
-add di,2
-mov dh,[di]
-inc di
-mov dl,[di]
-dec di
-call dec16out
-
-add di,4
-
-loop stu_10_
-lea di,STU0
-
-jmp operate
+jmp begin
 
 lea dx, pkey
 call show_string        ; output string at ds:dx
@@ -1163,7 +1138,7 @@ show_string proc     ;show the string whose address is dx
 show_string endp
 clear proc
     lea di,STU0
-mov cx,TOTAL
+    mov cx,TOTAL
 clear_stu:
     add di,3
     mov [di],0
