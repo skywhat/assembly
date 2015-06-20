@@ -16,16 +16,15 @@ data segment
 pkey db "press any key...$"
 STU0 DB "00",90,0,80,0,55,0,4 DUP(0)    ;number,chinese score,ranking,maths score,ranking,english score,ranking
 ;total score,ranking,average score
-STU1 DB "01",94,0,100,0,79,4 DUP(0)
+STU1 DB "01",94,0,100,0,79,0,4 DUP(0)
 STU2 DB "02",85,0,90,0,70,0,4 DUP(0)
 STU3 DB "03",60,0,80,0,55,0,4 DUP(0)
 STU4 DB "04",70,0,90,0,60,0,4 DUP(0)
 STU5 DB "05",80,0,7,0,0,0,4 DUP(0)
-
-STU6 DB "07",60,0,75,0,100,0,4 DUP(0)
-STU7 DB "08",85,0,55,0,70,0,4 DUP(0)
-STU8 DB "09",60,0,80,0,40,0,4 DUP(0) 
-STU9 DB "06",75,0,78,0,48,0,4 DUP(0)
+STU6 DB "06",60,0,75,0,100,0,4 DUP(0)
+STU7 DB "07",85,0,55,0,70,0,4 DUP(0)
+STU8 DB "08",60,0,80,0,40,0,4 DUP(0) 
+STU9 DB "09",75,0,78,0,48,0,4 DUP(0)
 
 SORTZONE DB  10 DUP(0)
 TOTAL EQU $-SORTZONE
@@ -42,27 +41,29 @@ FAILED_CH 20 DUP('F'); collect the student failed the subject
 FAILED_MA 20 DUP('F')
 FAILED_EN 20 DUP('F')
 
-caption db 10,13,"do not have the numerical instruction, please try it again.",10,13,"$"
-caption_wel db 10,13,"input the numerical instruction:",10,13,"$"
-caption1 db "1. get the information of a student",10,13,"$"
+captionline1  db "----------------------------------------------------------------------------",10,13,"$"
+
+caption db "do not have the numerical instruction, please try it again.",10,13,"$"
+caption_wel db 10,13,"--    input the numerical instruction:",10,13,"$"
+caption1 db "--     1. get the information of a student",10,13,"$"
 caption1next db 10,13,"please input the id of this student:",10,13,"$"
 caption1items db 10,13,"1. chinese",10,13,"2. maths",10,13,"3. english",10,13,"4. total score",10,13,"5. back to the previous level",10,13,"$"
 captionscore db 10,13,"score: $"
 captionranking db "ranking: ","$"
 student_num db 5,0,5 dup('$')
-caption2 db "2. check the student who are failed",10,13,"$"
+caption2 db "--     2. check the student who are failed",10,13,"$"
 caption2ch db 10,13,"chinese:",10,13,"$"
 caption2ma db 10,13,"maths:",10,13,"$"
 caption2en db 10,13,"english:",10,13,"$"
 caption2to db 10,13,"total:",10,13,"$"
 caption2no db "none.$"
-caption3 db "3. show the amount of students in different ranges.",10,13,"$"
+caption3 db "--     3. show the amount of students in different ranges.",10,13,"$"
 caption3_state db 10,13,"<60,60~70,70~80,80~90,90~100.",10,13,"$"
-caption4 db "4. show the average score.",10,13,"$"
+caption4 db "--     4. show the average score.",10,13,"$"
 caption4next db 10,13,"average score:$"
-caption5 db "5. record the students' data.",10,13,"$"
+caption5 db "--     5. record the students' data.",10,13,"$"
 record_state1 db 10,13,"please input 10 students' score of 3 subjects.",10,13,"$"
-caption6 db "6. modify the students' data.",10,13,"$"
+caption6 db "--     6. modify the students' data.",10,13,"$"
 caption6items db 10,13,"1. chinese",10,13,"2. maths",10,13,"3. english",10,13,"$"
 caption6input db 10,13,"please input the score.",10,13,"$"
 tbuff db 5 dup(0)
@@ -99,8 +100,9 @@ CALL AVER          ; average score for everyone
 CALL AVER_SUBJECT  ; average score for every subject and total score
 CALL RANGE  ;
 
-
 operate:
+lea dx,captionline1
+call show_string
 lea dx,caption_wel
 call show_string
 lea dx,caption1
@@ -115,8 +117,15 @@ lea dx,caption5
 call show_string
 lea dx,caption6
 call show_string
+lea dx,captionline1
+call show_string
 mov ah,01h
 int 21h
+
+push ax
+mov ax,3
+int 10h
+pop ax
 
 cmp al,31h
 jz check
@@ -711,19 +720,14 @@ JZ FAILED_FF
 ADD SI,2
 JMP NEXT_FAILED_ZONE
 FAILED_FF:
-SUB DI,2
-MOV AL,[DI]
+MOV AL,[DI-2]
 MOV [SI],AL
-INC SI
-INC DI
-MOV AL,[DI]
-MOV [SI],AL
-ADD DI,1
+MOV AL,[DI-1]
+MOV [SI+1],AL
 
 R9:
 ADD DI,12
 LOOP R_CH
-
 
 LEA DI,STU0
 ADD DI,4
@@ -777,11 +781,9 @@ FAILED_FF_MA:
 SUB DI,4
 MOV AL,[DI]
 MOV [SI],AL
-INC SI
-INC DI
-MOV AL,[DI]
-MOV [SI],AL
-ADD DI,3
+MOV AL,[DI+1]
+MOV [SI+1],AL
+ADD DI,4
 
 R9_MA:
 ADD DI,12
@@ -818,8 +820,6 @@ R6_EN:CMP [DI],60
 JAE R7_EN
 JMP R8_EN
 
-
-
 R7_EN:LEA SI,NUM_EN
 ADD SI,1
 ADD [SI],1
@@ -839,11 +839,9 @@ FAILED_FF_EN:
 SUB DI,6
 MOV AL,[DI]
 MOV [SI],AL
-INC SI
-INC DI
-MOV AL,[DI]
-MOV [SI],AL
-ADD DI,5
+MOV AL,[DI+1]
+MOV [SI+1],AL
+ADD DI,6
 
 R9_EN:
 ADD DI,12
@@ -863,10 +861,7 @@ INT 21H
 POP DX
 RET
 CRLF ENDP
-
 show_who_are_failed proc
-
-
 lea di,FAILED_CH
 show_who_are_failed_ch:
 cmp [di],'F'
@@ -924,7 +919,6 @@ cmp [di],'F'
 jz show_who_are_failed_en
 jmp output_show_who_are_failed_ma2
 
-
 show_who_are_failed_en:
 lea di,FAILED_EN
 cmp [di],'F'
@@ -953,12 +947,10 @@ inc di
 cmp [di],'F'
 jz show_who_are_failed_end
 jmp output_show_who_are_failed_en2
-
 show_who_are_failed_end:
-
+CALL CRLF
 ret
 show_who_are_failed endp
-
 
 show_range proc
 lea dx,caption3_state
@@ -1005,6 +997,7 @@ call stdout
 inc di
 loop show_range_en
 
+call CRLF
 ret
 show_range endp
 
@@ -1046,7 +1039,7 @@ inc di
 mov dl,[di]
 
 call dec16out
-
+call CRLF
 ret
 show_average endp
 
@@ -1140,21 +1133,14 @@ clear proc
     lea di,STU0
     mov cx,TOTAL
 clear_stu:
-    add di,3
-    mov [di],0
-    add di,2
-    mov [di],0
-    add di,2
-    mov [di],0
-    inc di
-    mov [di],0
-    inc di
-    mov [di],0
-    inc di
-    mov [di],0
-    inc di
-    mov [di],0
-    inc di
+    mov [di+3],0
+    mov [di+5],0
+    mov [di+7],0
+    mov [di+8],0
+    mov [di+9],0
+    mov [di+10],0
+    mov [di+11],0
+    ADD di,12
     loop clear_stu        
 lea di,NUM_CH
 mov cx,15
