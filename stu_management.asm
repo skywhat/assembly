@@ -28,6 +28,7 @@ STU9 DB "05",75,0,78,0,48,0,4 DUP(0)
 
 SORTZONE DB  10 DUP(0)
 TOTAL EQU 10
+FLAG DB 0 ; record the amount of the student deleted
 SORTZONE_DW DW 10 DUP(0)
 
 AVER_SCORE DB 3 DUP(0); average score for chinese,maths,english
@@ -41,14 +42,14 @@ FAILED_MA 20 DUP('F')
 FAILED_EN 20 DUP('F')
 captionline1  db "----------------------------------------------------------------------------",10,13,"$"
 caption db "do not have the numerical instruction, please try it again.",10,13,"$"
-caption_wel db 10,13,"--    input the numerical instruction:",10,13,"$"
-caption1 db "--     1. get the information of a student",10,13,"$"
+caption_wel db 10,13,"--     input the numerical instruction:",10,13,"$"
+caption1 db "--     1. get the information of a student.",10,13,"$"
 caption1next db 10,13,"please input the id of this student:",10,13,"$"
 caption1items db 10,13,"1. chinese",10,13,"2. maths",10,13,"3. english",10,13,"4. total score",10,13,"5. back to the previous level",10,13,"$"
 captionscore db 10,13,"score: $"
 captionranking db "ranking: ","$"
 student_num db 5,0,5 dup('$')
-caption2 db "--     2. check the student who failed",10,13,"$"
+caption2 db "--     2. check the student who failed.",10,13,"$"
     caption2ch db 10,13,"chinese:",10,13,"$"
     caption2ma db 10,13,"maths:",10,13,"$"
     caption2en db 10,13,"english:",10,13,"$"
@@ -63,7 +64,7 @@ caption5 db "--     5. record the students' data again.",10,13,"$"
 caption6 db "--     6. modify the students' data.",10,13,"$"
     caption6items db 10,13,"1. chinese",10,13,"2. maths",10,13,"3. english",10,13,"$"
     caption6input db 10,13,"please input the score.",10,13,"$"
-caption7 db "--     7.delete a student's data. ",10,13,"$"
+caption7 db "--     7. delete a student's data. ",10,13,"$"
     caption7next db "delete it successfully!",10,13,"$"
 tbuff db 5 dup(0)
 
@@ -79,6 +80,10 @@ mov ds, ax
 mov es, ax
 begin:
 
+CALL STATISTIC
+CALL AVER_STUDENT  ; average score for every student         
+CALL AVER_SUBJECT  ; average score for every subject and total score
+CALL RANGE 
 MOV BX,02H
 CALL SORTSUBJECT
 CALL RANK
@@ -88,12 +93,8 @@ CALL RANK
 MOV BX,06H
 CALL SORTSUBJECT
 CALL RANK
-CALL STATISTIC
 CALL SORTSUBJECT_DW
-CALL RANK_DW
-CALL AVER          ; average score for everyone
-CALL AVER_SUBJECT  ; average score for every subject and total score
-CALL RANGE  
+CALL RANK_DW 
 
 operate:
 lea dx,captionline1
@@ -216,7 +217,7 @@ mov cl,0ah
 mov ch,0
 mov bx,0
 mov dx,0
-input_dec2hex:          ;input decimal number, [di] store it
+input_dec2hex:          ;input decimal number, and [di] store it
 call stdin
 cmp al,' '
 
@@ -357,12 +358,10 @@ LOOP PLACE2
 RET
 RANK ENDP
 
-STATISTIC PROC
+STATISTIC PROC  ;the total score of a student
 LEA DI,STU0+2
 MOV CX,TOTAL
 S1:
-CMP [DI],0FFH
-JZ S1_NEXT
 MOV AX,0
 ADD AL,[DI]
 ADC AH,0
@@ -377,7 +376,6 @@ MOV [DI],AH
 INC DI
 MOV [DI],AL
 ADD DI,5
-S1_NEXT:
 LOOP S1
 RET
 ENDP
@@ -458,70 +456,88 @@ LOOP PLACE2_DW
 RET
 RANK_DW ENDP
 
-AVER PROC
+AVER_STUDENT PROC
 LEA DI,STU0+8
 MOV CX,TOTAL
 MOV BL,3
-AVER1:
+AVER_STUDENT1:
 MOV AH,[DI]
 MOV AL,[DI+1]
 DIV BL
 MOV [DI+3],AL
 ADD DI,12
 
-LOOP AVER1
+LOOP AVER_STUDENT1
 RET
-AVER ENDP
+AVER_STUDENT ENDP
 
 AVER_SUBJECT PROC
 LEA SI,AVER_SCORE
-MOV BL,TOTAL
+MOV BX,TOTAL
+lea di,FLAG
+sub BL,[DI]
 
+mov cx,TOTAL
 LEA DI,STU0+2
 MOV AX,0
-MOV CX,TOTAL
 AVER_SUBJECT_1:
+CMP [DI],0FFH
+JZ AVER_SUBJECT_1_NEXT
 ADD AL,[DI]
 ADC AH,0
+AVER_SUBJECT_1_NEXT:
 ADD DI,12
 LOOP AVER_SUBJECT_1
 DIV BL
 MOV [SI],AL
 INC SI
 
+MOV CX,TOTAL
 LEA DI,STU0+4
 MOV AX,0
-MOV CX,TOTAL
 AVER_SUBJECT_2:
+CMP [DI],0FFH
+JZ AVER_SUBJECT_2_NEXT
 ADD AL,[DI]
 ADC AH,0
+AVER_SUBJECT_2_NEXT:
 ADD DI,12
 LOOP AVER_SUBJECT_2
 DIV BL
 MOV [SI],AL
 INC SI
 
+MOV CX,TOTAL
 LEA DI,STU0+6
 MOV AX,0
-MOV CX,TOTAL
 AVER_SUBJECT_3:
+CMP [DI],0FFH
+JZ AVER_SUBJECT_3_NEXT
 ADD AL,[DI]
 ADC AH,0
+AVER_SUBJECT_3_NEXT:
 ADD DI,12
 LOOP AVER_SUBJECT_3
 DIV BL
 MOV [SI],AL
 INC SI
 
+
+MOV CX,TOTAL
 LEA DI,STU0+8
 MOV AX,0
-MOV CX,TOTAL
-MOV BX,TOTAL
 AVER_SUBJECT_TOTAL:
 MOV DH,[DI]
-MOV DL,[DI+1]
+MOV DL,[DI+1]   
+CMP dx,02fdh
+JZ AVER_SUBJECT_TOTAL_NEXT
 ADD AX,DX
-ADD DI,12
+jmp AVER_SUBJECT_TOTAL_NEXT1: 
+AVER_SUBJECT_TOTAL_NEXT:
+mov dx,0
+mov [di],dx
+AVER_SUBJECT_TOTAL_NEXT1:
+add di,12
 LOOP AVER_SUBJECT_TOTAL
 MOV DX,0
 DIV BX
@@ -534,7 +550,7 @@ AVER_SUBJECT ENDP
 RANGE PROC
 LEA DI,STU0+2
 MOV CX,TOTAL
-
+           
 R_CH:
 CMP [DI],90
 JGE R1
@@ -1100,10 +1116,11 @@ show_delete proc
     call get_id
     mov [di],0ffh
     mov [di+2],0ffh
-    mov [di+4],0ffh
-    
+    mov [di+4],0ffh    
     lea dx,caption7next
     call show_string
+    lea di,FLAG
+    inc [di]
     ret
 show_delete endp
 
