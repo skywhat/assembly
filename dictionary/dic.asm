@@ -72,11 +72,11 @@ DATASG SEGMENT
 num dw 5 
 wordlen dw 10
 explainlen dw 300
-synonymlen dw 15     
+synonymlen dw 10     
 wordh db 10 dup(0) 
 explainh db 300 dup(0)  
-synonymh db 15 dup(0)  
-antonymh db 15 dup(0)    
+synonymh db 10 dup(0)  
+antonymh db 10 dup(0)    
 n db 100 dup(0)      
 cnt dw 100 dup(0)     
 flag db 10 dup(0)     
@@ -777,4 +777,3 @@ enter endp
 CODESG ENDS
 
 END MAIN
-

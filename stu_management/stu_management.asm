@@ -122,7 +122,7 @@ int 21h
 
 push ax
 mov ax,3
-int 10h
+int 10h  ;clear screen
 pop ax
 
 cmp al,31h
