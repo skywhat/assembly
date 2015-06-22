@@ -1,4 +1,4 @@
- SetScreen macro
+SetScreen macro
          Scroll 0,0,0,24,79,02h
          Scroll 19,3,4,21,75,50h 
          Scroll 15,5,6,19,73,2fh 
@@ -43,14 +43,13 @@ endm
  STACK ENDS
 DATASG SEGMENT 
  str1 db "----------------------------------------------------",10,13 
-      ;db "          simple dictionary                         ",10,13 
+      db "          simple dictionary                         ",10,13 
       db "          please input the numerical instruction:   ",10,13
       db "          1.add a new word                          ",10,13
       db "          2.change a word                           ",10,13 
       db "          3.delete a word                           ",10,13 
       db "          4.search a word                           ",10,13 
-      db "          0.exit                                    ",10,13
-      db "----------------------------------------------------",10,13,"$"
+      db "          0.exit                                    $"
  sub_1 db "      add a new word!$"
  sub_2 db "      change a word$"
  sub_3 db "      delete a word$"  
@@ -58,49 +57,20 @@ DATASG SEGMENT
  error db "      this is an error!$" 
  explainstr db "interpretation:$"
  synonymstr db "synonym:$"
- autonymstr db "autonym:$" 
+ antonymstr db "antonym:$" 
  nowordstr db "this word is not existed!$"
     
- word  db 'again$',4 dup(0)
-       db 'agree$',4 dup(0) 
-       db 'born$',5 dup(0)
-       db 'cat$', 6 dup(0)
-      db 'dog$',6 dup(0)
-      db 'eat$',6 dup(0)
-      db 'fish$',5 dup(0)
-      db 'graduate$',1 dup(0)
-       db 'hot$',6 dup(0) 
-       db 'ill$',6 dup(0)
-       db 'joke$',5 dup(0)
-       db 'king$',5 dup(0) 
-       db 'look$',5 dup(0) 
-       db 'milk$',5 dup(0)  
-       db 'nurse$',4 dup(0) 
-      db 'orange$',3 dup(0)       
-       db 'play$',5 dup(0)
-      db 'queen$',4 dup(0) 
-      db 'rule$',5 dup(0)
-      db 'sky$',6 dup(0)
-      db 'think$',4 dup(0)
-       db 'unite$',4 dup(0)
-       db 'vitory$',3 dup(0)
-      db 'window$',3 dup(0)
-      db 'xray$',5 dup(0)
-       db 'year$',5 dup(0)
-      db 'zoo$',6 dup(0) 
-       db  10 dup(0)
-       db  10 dup(0)
-       db  10 dup(0)
+ word  db 1000 dup(0)
        db  '$',9 dup(0)
        db 100 dup(0) 
 num dw 5 
 wordlen dw 10
-explainlen dw 30
-synonymlen dw 10     
+explainlen dw 300
+synonymlen dw 15     
 wordh db 10 dup(0) 
-explainh db 30 dup(0)  
-synonymh db 10 dup(0)  
-autonymh db 10 dup(0)    
+explainh db 300 dup(0)  
+synonymh db 15 dup(0)  
+antonymh db 15 dup(0)    
 n db 100 dup(0)      
 cnt dw 100 dup(0)     
 flag db 10 dup(0)     
@@ -120,11 +90,11 @@ synonym  db 'once more$'
          db 100 dup(0) 
          db '$'  
 
-autonym db 'never$',4 dup(0)
+antonym db 'never$',4 dup(0)
         db 'disagree$',1 dup(1)
         db 'study$',4 dup(0)
         db 'unborn$',3 dup(0)
-        db 'n autonym$' 
+        db 'n antonym$' 
         db 100 dup(0) 
         db '$'
 DATASG ENDS
@@ -231,8 +201,7 @@ SUB4: push5
 
  EXIT:  RET
 	MAIN ENDP     
-;*****************************************
-;???? 
+ 
 change proc near 
     push5
     push di
@@ -277,7 +246,7 @@ deletew proc near
    div cl
    mov cx,num
    sub cx,ax 
-   mov dx,cx;???????
+   mov dx,cx
    cmp flag,0
    jz exitdel  
    dela:
@@ -291,8 +260,8 @@ deletew proc near
    mov byte ptr word[si],bl
    mov bl,byte ptr synonym[di]
    mov byte ptr synonym[si],bl
-   mov bl,byte ptr autonym[di]
-   mov byte ptr autonym[si],bl
+   mov bl,byte ptr antonym[di]
+   mov byte ptr antonym[si],bl
    inc di
    inc si
    loop de
@@ -377,7 +346,7 @@ new_word  proc near
     inc di
     mov ah,01
     int 21h
-    mov autonymh[di],al
+    mov antonymh[di],al
     cmp al,'$'
     jnz inputa    
 
@@ -414,17 +383,16 @@ new_word  proc near
     exit_n:           
     Scroll 0,5,6,19,73,02h   
     Scroll 15,5,6,19,73,2fh 
-    curse 0,0
+    curse 5,7
      
    
-;**************************************    
-    inc num;????1 
+   
+    inc num 
     pop di 
     pop5  
     ret
 new_word  endp 
-;*****************************************
-;??????????????
+
 check proc near
     push5 
     push di
@@ -471,8 +439,8 @@ pushnext proc near
     mov byte ptr word[di],al
     mov al,byte ptr synonym[si]
     mov byte ptr synonym[di],al
-    mov al,byte ptr autonym[si]
-    mov byte ptr autonym[di],al
+    mov al,byte ptr antonym[si]
+    mov byte ptr antonym[di],al
     inc si
     inc di
     loop lnext
@@ -510,8 +478,8 @@ insert proc near
     mov byte ptr word[si],bl
     mov bl,byte ptr synonymh[di]
     mov byte ptr synonym[si],bl
-    mov bl,byte ptr autonymh[di]
-    mov byte ptr autonym[si],bl
+    mov bl,byte ptr antonymh[di]
+    mov byte ptr antonym[si],bl
     inc si
     inc di
     loop L
@@ -545,8 +513,8 @@ search_ex  proc near
     mov ah,1
     int 21h  
     push5
-    Scroll 0,5,6,19,73,02h ;??  
-    Scroll 15,5,6,19,73,2fh ;?????????
+    Scroll 0,5,6,19,73,02h   
+    Scroll 15,5,6,19,73,2fh 
     pop5
     mov wordh[di],al
     cmp al,'$'
@@ -600,12 +568,12 @@ search_ex  proc near
     int 21h 
     Scroll 2,5,6,19,73,2fh
     curse 19,6 
-    lea dx,autonymstr
+    lea dx,antonymstr
     mov ah,09h
     int 21h
     Scroll 1,5,6,19,73,2fh
     curse 19,6 
-    lea dx,autonym
+    lea dx,antonym
     add dx,cnt
     mov ah,09
     int 21h 
