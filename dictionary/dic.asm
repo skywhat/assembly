@@ -1,8 +1,8 @@
 SetScreen macro
          Scroll 0,0,0,24,79,02h
          Scroll 19,3,4,21,75,50h 
-         Scroll 15,5,6,19,73,2fh 
-         Curse  5,7 
+         Scroll 18,4,5,20,74,2fh 
+         Curse  4,6 
       endm          			
 SCROLL    MACRO     N,ULR,ULC,LRR,LRC,ATT	
           MOV       AH,6				
@@ -41,7 +41,13 @@ endm
  STACK SEGMENT PARA STACK 'STACK'
 	DB 20 DUP('STACK   ')
  STACK ENDS
-DATASG SEGMENT 
+DATASG SEGMENT  
+    f1 db "C:\word.txt",0
+    f2 db "C:\meaning.txt",0
+    f3 db "C:\synonym.txt",0
+    f4 db "C:\antonym.txt",0
+    handle dw 0
+    
  str1 db "----------------------------------------------------",10,13 
       db "          simple dictionary                         ",10,13 
       db "          please input the numerical instruction:   ",10,13
@@ -50,11 +56,11 @@ DATASG SEGMENT
       db "          3.delete a word                           ",10,13 
       db "          4.search a word                           ",10,13 
       db "          0.exit                                    $"
- sub_1 db "      add a new word!$"
- sub_2 db "      change a word$"
- sub_3 db "      delete a word$"  
- sub_4 db "      search a word$"  
- error db "      this is an error!$" 
+ begin_1 db "      add a new word:$"
+ begin_2 db "      change a word:$"
+ begin_3 db "      delete a word:$"  
+ begin_4 db "      search a word:$"  
+ error db "      error.$" 
  explainstr db "interpretation:$"
  synonymstr db "synonym:$"
  antonymstr db "antonym:$" 
@@ -74,37 +80,22 @@ antonymh db 15 dup(0)
 n db 100 dup(0)      
 cnt dw 100 dup(0)     
 flag db 10 dup(0)     
-explain  db 'one more time$',16 dup(0)
-         db 'you think somebody is right$',2 dup(0) 
-         db 'the completion of a course$',3 dup(0)
-         db "to draw one's first breath$",3 dup(0)
-         db 'one kind of cute animal$',6 dup(0) 
-         db 300 dup(0)
+explain  db 30000 dup(0)
          db '$'
                               
-synonym  db 'once more$' 
-         db 'favour$',3 dup(0)
-         db 'finish$',3 dup(0)
-         db 'birth$',4 dup(0)
-         db 'kitty$',4 dup(0)
-         db 100 dup(0) 
+synonym  db 1500 dup(0) 
          db '$'  
 
-antonym db 'never$',4 dup(0)
-        db 'disagree$',1 dup(1)
-        db 'study$',4 dup(0)
-        db 'unborn$',3 dup(0)
-        db 'n antonym$' 
-        db 100 dup(0) 
+antonym db 1500 dup(0)
         db '$'
 DATASG ENDS
-; *********************
+
 EXTRA SEGMENT                                   
-; DATA GOES HEAR 
+ 
 EXTRA ENDS
-; *********************
+
 CODESG SEGMENT                  
-;----------------------
+
 MAIN PROC FAR
   ASSUME CS:CODESG,DS:DATASG,ES:EXTRA,SS:STACK
  PUSH DS
@@ -114,7 +105,95 @@ MAIN PROC FAR
  MOV  DS,AX
  MOV  AX,EXTRA
  MOV  ES,AX
-; MAIN PART OF PROGRAM GOES HEAR    
+
+ lea dx,f1     ;open file
+ mov ax,3d00h
+ int 21h
+ mov handle,ax
+
+mov bx,handle  ;mov the file pointer
+xor cx,cx
+xor dx,dx
+mov ax,4200h
+int 21h 
+
+lea dx,word
+mov bx,handle
+mov cx,30000   ;read file
+mov ah,3fh
+int 21h
+
+mov bx,handle
+mov ah,3eh    ;close file
+int 21h  
+
+ lea dx,f2     ;open file
+ mov ax,3d00h
+ int 21h
+ mov handle,ax
+
+mov bx,handle  ;mov the file pointer
+xor cx,cx
+xor dx,dx
+mov ax,4200h
+int 21h 
+
+lea dx,explain
+mov bx,handle
+mov cx,30000   ;read file
+mov ah,3fh
+int 21h
+
+mov bx,handle
+mov ah,3eh    ;close file
+int 21h
+          
+ lea dx,f3     ;open file
+ mov ax,3d00h
+ int 21h
+ mov handle,ax
+
+mov bx,handle  ;mov the file pointer
+xor cx,cx
+xor dx,dx
+mov ax,4200h
+int 21h 
+
+lea dx,synonym
+mov bx,handle
+mov cx,30000   ;read file
+mov ah,3fh
+int 21h  
+
+
+
+mov bx,handle
+mov ah,3eh    ;close file
+int 21h    
+
+ lea dx,f4     ;open file
+ mov ax,3d00h
+ int 21h
+ mov handle,ax
+
+mov bx,handle  ;mov the file pointer
+xor cx,cx
+xor dx,dx
+mov ax,4200h
+int 21h 
+
+lea dx,antonym
+mov bx,handle
+mov cx,30000   ;read file
+mov ah,3fh
+int 21h  
+
+
+
+mov bx,handle
+mov ah,3eh    ;close file
+int 21h
+   
  SetScreen  
 START:    LEA DX,STR1
       MOV AH,9H
@@ -124,15 +203,15 @@ START:    LEA DX,STR1
       MOV CL, AL
 
 
-      MOV AL, CL
+      MOV AL,CL
       CMP AL, 31H
-      JZ SUB1
+      JZ begin1
       CMP AL,32H
-      JZ SUB2 
+      JZ begin2 
       CMP AL,33H
-      JZ SUB3
+      JZ begin3
       CMP AL,34H
-      JZ SUB4  
+      JZ begin4  
       CMP AL,30H
       JZ EXIT
       LEA DX, ERROR
@@ -141,13 +220,13 @@ START:    LEA DX,STR1
       MOV AH, 1
       INT 21H
       JMP START
-SUB1: push5        
+begin1: push5        
       SetScreen      
       pop5 
-      lea dx,sub_1
+      lea dx,begin_1
       mov ah,09h
       int 21h 
-      curse 0,0
+      curse 4,26
       call new_word
       MOV AH, 1
       INT 21H
@@ -155,13 +234,13 @@ SUB1: push5
       SetScreen
       pop5
       JMP START
-SUB2: push5  
+begin2: push5  
       SetScreen
       pop5 
-      LEA DX, SUB_2
+      LEA DX,begin_2
 	  MOV AH, 9
 	  INT 21H 
-	  curse 0,0 
+	  curse 4,26 
       call change
       MOV AH, 1
       INT 21H  
@@ -169,13 +248,13 @@ SUB2: push5
       SetScreen
       pop5
       JMP START       
-SUB3: push5  
+begin3: push5  
       SetScreen
       pop5  
-      LEA DX, SUB_3
+      LEA DX,begin_3
 	  MOV AH, 9
 	  INT 21H 
-	  curse 0,0
+	  curse 4,26
 	  call deletew
       MOV AH, 1
       INT 21H  
@@ -183,13 +262,13 @@ SUB3: push5
       SetScreen
       pop5
       JMP START
-SUB4: push5  
+begin4: push5  
       SetScreen
       pop5
-      LEA DX, SUB_4
+      LEA DX, begin_4
 	  MOV AH, 9
 	  INT 21H 
-      curse 0,0
+      curse 4,26
       mov n,0 
       call search_ex 
       mov ah,1
@@ -202,10 +281,10 @@ SUB4: push5
  EXIT:  RET
 	MAIN ENDP     
  
-change proc near 
+change proc 
     push5
     push di
-    curse 0,0
+    curse 4,26
     call search_ex
     cmp flag,0
     jz exitchan 
@@ -236,7 +315,7 @@ change endp
 deletew proc near
    push5
    push di
-   curse 0,0
+   curse 4,26
    call search_ex
    mov cx,wordlen
    mov si,cnt  
@@ -304,7 +383,7 @@ deletew proc near
 deletew   endp 
 
   
-new_word  proc near   
+new_word  proc  
     push5  
     push di
     curse 19,6
@@ -393,7 +472,7 @@ new_word  proc near
     ret
 new_word  endp 
 
-check proc near
+check proc
     push5 
     push di
     mov cx,si
@@ -425,7 +504,7 @@ check proc near
     ret
 check endp 
 
-pushnext proc near
+pushnext proc
     push di
     push ax
     push si
@@ -468,7 +547,7 @@ pushnext proc near
     ret
 pushnext endp
 
-insert proc near
+insert proc
     mov di,0
     push cx 
     push si
@@ -505,7 +584,8 @@ insert proc near
 insert endp  
 
     
-search_ex  proc near  
+search_ex  proc
+    add n,26  
     push5    
     mov di,-1
     mark1:
@@ -523,7 +603,7 @@ search_ex  proc near
     push5      
     Scroll 1,5,6,19,73,2fh            
     inc n
-    curse 0,n
+    curse 4,n
     pop5   
     jmp mark1 
     
@@ -591,7 +671,7 @@ search_ex  proc near
     ret               
 search_ex endp
 
-compare proc near 
+compare proc 
     push si
     push bx
     push di
@@ -641,7 +721,7 @@ compare proc near
 compare endp
     
 
- found proc near
+ found proc
     push5
     mov si,-10
     mov cx,si
@@ -679,7 +759,7 @@ compare endp
     ret    
  found endp
  
-enter proc near   
+enter proc  
       push dx
       push ax
       MOV DL, 10
@@ -693,15 +773,6 @@ enter proc near
       ret
 enter endp
 
-CRLF proc
-      MOV DL, 10		;carriage return 
-      MOV AH, 2
-      INT 21H
-      MOV DL, 13	 ;line feed
-      MOV AH, 2
-INT 21H 
-    ret
-CRLF endp
 
 CODESG ENDS
 
