@@ -194,7 +194,7 @@ mov bx,handle
 mov ah,3eh    ;close file
 int 21h
    
- SetScreen  
+setscreen  
 START:    LEA DX,STR1
       MOV AH,9H
       INT 21H
@@ -227,7 +227,7 @@ begin1: push5
       mov ah,09h
       int 21h 
       curse 4,26
-      call new_word
+      call addword
       MOV AH, 1
       INT 21H
       push5
@@ -241,7 +241,7 @@ begin2: push5
 	  MOV AH, 9
 	  INT 21H 
 	  curse 4,26 
-      call change
+      call changeword
       MOV AH, 1
       INT 21H  
       push5
@@ -255,7 +255,7 @@ begin3: push5
 	  MOV AH, 9
 	  INT 21H 
 	  curse 4,26
-	  call deletew
+	  call deleteword
       MOV AH, 1
       INT 21H  
       push5
@@ -270,7 +270,7 @@ begin4: push5
 	  INT 21H 
       curse 4,26
       mov n,0 
-      call search_ex 
+      call searchword 
       mov ah,1
       int 21h
       push5
@@ -281,11 +281,11 @@ begin4: push5
  EXIT:  RET
 	MAIN ENDP     
  
-change proc 
+changeword proc 
     push5
     push di
     curse 4,26
-    call search_ex
+    call searchword
     cmp flag,0
     jz exitchan 
     mov ax,cnt 
@@ -309,14 +309,14 @@ change proc
     pop di
     pop5 
     ret
-change endp
+changeword endp
 
 
-deletew proc near
+deleteword proc near
    push5
    push di
    curse 4,26
-   call search_ex
+   call searchword
    mov cx,wordlen
    mov si,cnt  
    mov di,si 
@@ -380,10 +380,10 @@ deletew proc near
    pop di
    pop5  
     ret 
-deletew   endp 
+deleteword   endp 
 
   
-new_word  proc  
+addword  proc  
     push5  
     push di
     curse 19,6
@@ -470,7 +470,7 @@ new_word  proc
     pop di 
     pop5  
     ret
-new_word  endp 
+addword  endp 
 
 check proc
     push5 
@@ -584,7 +584,7 @@ insert proc
 insert endp  
 
     
-search_ex  proc
+searchword  proc
     add n,26  
     push5    
     mov di,-1
@@ -669,7 +669,7 @@ search_ex  proc
     mov n,0      
     pop5 
     ret               
-search_ex endp
+searchword endp
 
 compare proc 
     push si
